@@ -9,7 +9,7 @@ function EditProfile() {
   const [username, setUsername] = useState(user.username);
 
   const saveProfile = async () => {
-    const res = await fetch("http://localhost:3000/api/user/update", {
+    const res = await fetch("https://galaxyverse.onrender.com/api/user/update", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

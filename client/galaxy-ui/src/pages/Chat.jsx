@@ -33,7 +33,7 @@ function Chat() {
     });
 
   const fetchMessages = async () => {
-    const res = await fetch(`http://localhost:3000/api/messages/${galaxyId}`, {
+    const res = await fetch(`https://galaxyverse.onrender.com/api/messages/${galaxyId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
@@ -51,7 +51,7 @@ function Chat() {
   const sendMessage = async () => {
     if (!text.trim()) return;
 
-    await fetch("http://localhost:3000/api/messages/send", {
+    await fetch("https://galaxyverse.onrender.com/api/messages/send", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -9,7 +9,7 @@ function Signals() {
   }, []);
 
   const fetchSignals = async () => {
-    const res = await fetch("http://localhost:3000/api/friends/requests", {
+    const res = await fetch("https://galaxyverse.onrender.com/api/friends/requests", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -19,7 +19,7 @@ function Signals() {
   };
 
   const accept = async (userId) => {
-    await fetch("http://localhost:3000/api/friends/accept", {
+    await fetch("https://galaxyverse.onrender.com/api/friends/accept", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -31,7 +31,7 @@ function Signals() {
   };
 
   const reject = async (userId) => {
-    await fetch("http://localhost:3000/api/friends/reject", {
+    await fetch("https://galaxyverse.onrender.com/api/friends/reject", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

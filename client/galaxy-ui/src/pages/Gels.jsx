@@ -12,7 +12,7 @@ function Gels() {
   }, []);
 
   const fetchGels = async () => {
-    const res = await fetch("http://localhost:3000/api/friends/list", {
+    const res = await fetch("https://galaxyverse.onrender.com/api/friends/list", {
       headers: { Authorization: `Bearer ${token}` }
     });
     const data = await res.json();
@@ -22,7 +22,7 @@ function Gels() {
   const addGel = async () => {
     if (!galaxyId) return;
 
-    await fetch("http://localhost:3000/api/friends/send", {
+    await fetch("https://galaxyverse.onrender.com/api/friends/send", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
