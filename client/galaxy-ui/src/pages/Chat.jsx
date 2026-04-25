@@ -47,11 +47,11 @@ function Chat() {
     }
   };
 
-  // 🔥 POLLING (auto refresh every 2 seconds)
+  // 🔥 Polling (auto refresh)
   useEffect(() => {
     if (!galaxyId) return;
 
-    fetchMessages(); // first load
+    fetchMessages();
 
     const interval = setInterval(() => {
       fetchMessages();
@@ -60,7 +60,7 @@ function Chat() {
     return () => clearInterval(interval);
   }, [galaxyId]);
 
-  // 🔽 Auto scroll to bottom
+  // 🔽 Auto scroll
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -79,29 +79,17 @@ function Chat() {
       });
 
       setText("");
-      fetchMessages(); // instant update after send
+      fetchMessages();
     } catch (err) {
       console.error("Error sending message:", err);
     }
   };
 
   return (
-    <div style={{ padding: "20px", color: "white" }}>
-      <h3>💬 Chat with {galaxyId}</h3>
+    <div className="chat-container">
+      <h3 style={{ textAlign: "center" }}>💬 Chat with {galaxyId}</h3>
 
-      <div
-        style={{
-          minHeight: "60vh",
-          padding: "15px",
-          borderRadius: "16px",
-          border: "2px solid black",
-          background: "rgba(0,0,0,0.45)",
-          overflowY: "auto",
-          display: "flex",
-          flexDirection: "column",
-          width: "100%",
-        }}
-      >
+      <div className="chat-messages">
         {messages.map((m, index) => {
           const senderId = normalizeSenderId(m.sender);
           const isMe = senderId === myId;
@@ -116,47 +104,19 @@ function Chat() {
           return (
             <div key={m._id}>
               {showDate && (
-                <div
-                  style={{
-                    textAlign: "center",
-                    margin: "16px 0 8px",
-                    fontSize: "12px",
-                    opacity: 0.7,
-                  }}
-                >
+                <div className="chat-date">
                   {formatDate(m.createdAt)}
                 </div>
               )}
 
-              <div
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: isMe ? "flex-end" : "flex-start",
-                  marginBottom: "10px",
-                }}
-              >
+              <div className={`chat-row ${isMe ? "me" : "other"}`}>
                 <div
-                  style={{
-                    background: isMe ? "#00a0f2" : "#1f1f1f",
-                    color: "white",
-                    padding: "10px 14px",
-                    borderRadius: "14px",
-                    maxWidth: "65%",
-                    boxShadow: isMe
-                      ? "0 0 10px rgba(0,160,242,0.6)"
-                      : "0 0 6px rgba(255,255,255,0.15)",
-                  }}
+                  className={`chat-bubble ${
+                    isMe ? "chat-me" : "chat-other"
+                  }`}
                 >
                   <div>{m.text}</div>
-                  <div
-                    style={{
-                      fontSize: "11px",
-                      opacity: 0.6,
-                      marginTop: "4px",
-                      textAlign: "right",
-                    }}
-                  >
+                  <div className="chat-time">
                     {formatTime(m.createdAt)}
                   </div>
                 </div>
@@ -167,21 +127,13 @@ function Chat() {
         <div ref={bottomRef} />
       </div>
 
-      <div style={{ marginTop: "15px", display: "flex" }}>
+      <div className="chat-input">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Type message..."
-          style={{
-            flex: 1,
-            padding: "12px",
-            borderRadius: "14px",
-            border: "2px solid black",
-          }}
         />
-        <button onClick={sendMessage} style={{ marginLeft: "10px" }}>
-          🚀
-        </button>
+        <button onClick={sendMessage}>🚀</button>
       </div>
     </div>
   );
