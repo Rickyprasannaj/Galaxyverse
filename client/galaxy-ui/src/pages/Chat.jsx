@@ -33,17 +33,34 @@ function Chat() {
     });
 
   const fetchMessages = async () => {
-    const res = await fetch(`https://galaxyverse.onrender.com/api/messages/${galaxyId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    setMessages(data);
+    try {
+      const res = await fetch(
+        `https://galaxyverse.onrender.com/api/messages/${galaxyId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const data = await res.json();
+      setMessages(data);
+    } catch (err) {
+      console.error("Error fetching messages:", err);
+    }
   };
 
+  // 🔥 POLLING (auto refresh every 2 seconds)
   useEffect(() => {
-    fetchMessages();
+    if (!galaxyId) return;
+
+    fetchMessages(); // first load
+
+    const interval = setInterval(() => {
+      fetchMessages();
+    }, 2000);
+
+    return () => clearInterval(interval);
   }, [galaxyId]);
 
+  // 🔽 Auto scroll to bottom
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -51,17 +68,21 @@ function Chat() {
   const sendMessage = async () => {
     if (!text.trim()) return;
 
-    await fetch("https://galaxyverse.onrender.com/api/messages/send", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ galaxyId, text }),
-    });
+    try {
+      await fetch("https://galaxyverse.onrender.com/api/messages/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ galaxyId, text }),
+      });
 
-    setText("");
-    fetchMessages();
+      setText("");
+      fetchMessages(); // instant update after send
+    } catch (err) {
+      console.error("Error sending message:", err);
+    }
   };
 
   return (
@@ -78,7 +99,7 @@ function Chat() {
           overflowY: "auto",
           display: "flex",
           flexDirection: "column",
-          width: "100%", // ✅ ensure chat container spans full width
+          width: "100%",
         }}
       >
         {messages.map((m, index) => {
@@ -87,7 +108,9 @@ function Chat() {
 
           const currentDate = new Date(m.createdAt).toDateString();
           const previousDate =
-            index > 0 ? new Date(messages[index - 1].createdAt).toDateString() : null;
+            index > 0
+              ? new Date(messages[index - 1].createdAt).toDateString()
+              : null;
           const showDate = currentDate !== previousDate;
 
           return (
@@ -105,7 +128,6 @@ function Chat() {
                 </div>
               )}
 
-              {/* ✅ Wrapper spans full width */}
               <div
                 style={{
                   width: "100%",
@@ -114,7 +136,6 @@ function Chat() {
                   marginBottom: "10px",
                 }}
               >
-                {/* ✅ Bubble */}
                 <div
                   style={{
                     background: isMe ? "#00a0f2" : "#1f1f1f",
