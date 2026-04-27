@@ -7,8 +7,17 @@ function Chat() {
   const [text, setText] = useState("");
 
   const token = localStorage.getItem("token");
-  const user = JSON.parse(localStorage.getItem("user"));
-  const myId = String(user._id);
+
+  // 🔥 SAFE USER PARSE (no crash)
+  const storedUser = localStorage.getItem("user");
+  let user = null;
+  try {
+    user = storedUser ? JSON.parse(storedUser) : null;
+  } catch {
+    user = null;
+  }
+
+  const myId = user?._id ? String(user._id) : "";
 
   const bottomRef = useRef(null);
 
@@ -32,6 +41,7 @@ function Chat() {
       minute: "2-digit",
     });
 
+  // 🔥 SAFE FETCH
   const fetchMessages = async () => {
     try {
       const res = await fetch(
@@ -40,14 +50,22 @@ function Chat() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+
       const data = await res.json();
-      setMessages(data);
+
+      if (Array.isArray(data)) {
+        setMessages(data);
+      } else {
+        console.error("Invalid messages:", data);
+        setMessages([]);
+      }
     } catch (err) {
-      console.error("Error fetching messages:", err);
+      console.error("Fetch error:", err);
+      setMessages([]);
     }
   };
 
-  // 🔥 Polling (auto refresh)
+  // 🔥 POLLING
   useEffect(() => {
     if (!galaxyId) return;
 
@@ -60,7 +78,7 @@ function Chat() {
     return () => clearInterval(interval);
   }, [galaxyId]);
 
-  // 🔽 Auto scroll
+  // 🔽 AUTO SCROLL
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -81,49 +99,54 @@ function Chat() {
       setText("");
       fetchMessages();
     } catch (err) {
-      console.error("Error sending message:", err);
+      console.error("Send error:", err);
     }
   };
+
+  // 🔥 SAFETY UI
+  if (!token) return <div>Please login again</div>;
+  if (!galaxyId) return <div>Loading...</div>;
 
   return (
     <div className="chat-container">
       <h3 style={{ textAlign: "center" }}>💬 Chat with {galaxyId}</h3>
 
       <div className="chat-messages">
-        {messages.map((m, index) => {
-          const senderId = normalizeSenderId(m.sender);
-          const isMe = senderId === myId;
+        {Array.isArray(messages) &&
+          messages.map((m, index) => {
+            const senderId = normalizeSenderId(m.sender);
+            const isMe = senderId === myId;
 
-          const currentDate = new Date(m.createdAt).toDateString();
-          const previousDate =
-            index > 0
-              ? new Date(messages[index - 1].createdAt).toDateString()
-              : null;
-          const showDate = currentDate !== previousDate;
+            const currentDate = new Date(m.createdAt).toDateString();
+            const previousDate =
+              index > 0
+                ? new Date(messages[index - 1].createdAt).toDateString()
+                : null;
+            const showDate = currentDate !== previousDate;
 
-          return (
-            <div key={m._id}>
-              {showDate && (
-                <div className="chat-date">
-                  {formatDate(m.createdAt)}
-                </div>
-              )}
+            return (
+              <div key={m._id}>
+                {showDate && (
+                  <div className="chat-date">
+                    {formatDate(m.createdAt)}
+                  </div>
+                )}
 
-              <div className={`chat-row ${isMe ? "me" : "other"}`}>
-                <div
-                  className={`chat-bubble ${
-                    isMe ? "chat-me" : "chat-other"
-                  }`}
-                >
-                  <div>{m.text}</div>
-                  <div className="chat-time">
-                    {formatTime(m.createdAt)}
+                <div className={`chat-row ${isMe ? "me" : "other"}`}>
+                  <div
+                    className={`chat-bubble ${
+                      isMe ? "chat-me" : "chat-other"
+                    }`}
+                  >
+                    <div>{m.text}</div>
+                    <div className="chat-time">
+                      {formatTime(m.createdAt)}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
         <div ref={bottomRef} />
       </div>
 
