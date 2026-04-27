@@ -1,10 +1,18 @@
 import { useEffect } from "react";
-import { useNavigate ,useLocation} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./home.css";
+
 function Home() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const user = JSON.parse(localStorage.getItem("user"));
+
+  const storedUser = localStorage.getItem("user");
+  let user = null;
+
+  try {
+    user = storedUser ? JSON.parse(storedUser) : null;
+  } catch {
+    user = null;
+  }
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -18,12 +26,13 @@ function Home() {
       <div className="profile-card">
         <div className="earth-icon">🌍</div>
 
-        <h2 className="username">{user?.username}</h2>
-        <p className="galaxy-id">{user?.galaxyId}</p>
+        <h2 className="username">{user?.username || "Unknown"}</h2>
+        <p className="galaxy-id">{user?.galaxyId || "No ID"}</p>
         <p className="status">● Online</p>
 
         <div className="profile-actions">
           <button className="btn">Edit Profile</button>
+
           <button
             className="btn"
             onClick={() => {
@@ -35,28 +44,6 @@ function Home() {
           </button>
         </div>
       </div>
-
-      {/* Bottom Navigation */}
-      <div
-  className={`tab ${location.pathname === "/home" ? "active" : ""}`}
-  onClick={() => navigate("/home")}
->
-  🏠 Home
-</div>
-
-<div
-  className={`tab ${location.pathname === "/gels" ? "active" : ""}`}
-  onClick={() => navigate("/gels")}
->
-  🪐 Gels
-</div>
-
-<div
-  className={`tab ${location.pathname === "/signals" ? "active" : ""}`}
-  onClick={() => navigate("/signals")}
->
-  🔔 Signals
-</div>
 
     </div>
   );
